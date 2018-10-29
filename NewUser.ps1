@@ -47,7 +47,7 @@ $Notes = Get-Date -UFormat "%m/%d/%Y: NG"
 $Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri http://EXCHANGESERVER.contoso.net/PowerShell/ -Authentication Kerberos -Credential $ExchangeCredential
 Import-PSSession $Session -WarningAction SilentlyContinue 
 <# You can set which mailbox database the user will be in with -database parameter, the Address Book Policy -AddressBookPolicy, and Retention Policy -RetentionPolicy#>
-new-mailbox -Alias "$FirstName.$Lastname" -FirstName "$FirstName" -LastName "$Lastname" -displayname "$FirstName $Lastname" -Name "$FirstName $Lastname"  -UserPrincipalName "$FirstName.$Lastname@ocdc.net" -Password $securePass
+new-mailbox -Alias "$FirstName.$Lastname" -FirstName "$FirstName" -LastName "$Lastname" -displayname "$FirstName $Lastname" -Name "$FirstName $Lastname"  -UserPrincipalName "$FirstName.$Lastname@contoso.net" -Password $securePass
 Remove-PSSession $Session
 
 Start-Sleep -Seconds 5
@@ -62,11 +62,11 @@ Start-Sleep -Seconds 5
     $Company = "Contoso"
 
     <# Gives user group membership to county staff groups #>
-    $User = Get-ADUser -Identity "$FirstName.$LastName" -Server "10COMMOSVR01.ocdc.net"
-    $Group = Get-ADGroup -Identity "CN=*Marion and Clackamas County Staff,OU=Groups,OU=Marion and Clackamas County,OU=Counties,DC=ocdc,DC=net" -Server "10COMMOSVR01.ocdc.net"
-    Add-ADGroupMember -Identity $Group -Members $User -Server "10COMMOSVR01.ocdc.net"
-    $Group = Get-ADGroup -Identity "CN=Marion and Clackamas County Staff,OU=Groups,OU=Marion and Clackamas County,OU=Counties,DC=ocdc,DC=net" -Server "10COMMOSVR01.ocdc.net"
-    Add-ADGroupMember -Identity $Group -Members $User -Server "10COMMOSVR01.ocdc.net"
+    $User = Get-ADUser -Identity "$FirstName.$LastName" -Server "EXCHANGESERVER.contoso.net"
+    $Group = Get-ADGroup -Identity "CN=*GROUPNAME,OU=Groups,DC=contoso,DC=net" -Server "EXCHANGESERVER.contoso.net"
+    Add-ADGroupMember -Identity $Group -Members $User -Server "EXCHANGESERVER.contoso.net"
+    $Group = Get-ADGroup -Identity "CN=*GROUPNAME,OU=Groups,DC=contoso,DC=net" -Server "EXCHANGESERVER.contoso.net"
+    Add-ADGroupMember -Identity $Group -Members $User -Server "EXCHANGESERVER.contoso.net"
 
 <# Creates a Email template with the log on information#>
 $CredentialTemplate = "
@@ -81,7 +81,7 @@ Password: $password
 Invoke-Item newuser.txt
 
 <# Sets Description, Profile Path - Home Drive - Drive Path, Company - Title#>
-Set-ADUser -Identity "$FirstName.$LastName" -DisplayName "$FirstName $LastName ($Company)" -Description "$Description" -SamAccountName "$FirstName.$LastName" -UserPrincipalName "$FirstName.$LastName@ocdc.net" -EmailAddress "$Email" -Server "EXCHANGESERVER.contoso.net" -Enabled $true -Company "$Company" -ProfilePath "$ProfilePath" -ScriptPath "$LogonScript" -HomeDrive H -HomeDirectory "$DrivePath" -Title "$JobTitle" -GivenName "$FirstName" -Surname "$LastName" -Department "$Department"
+Set-ADUser -Identity "$FirstName.$LastName" -DisplayName "$FirstName $LastName ($Company)" -Description "$Description" -SamAccountName "$FirstName.$LastName" -UserPrincipalName "$FirstName.$LastName@contoso.net" -EmailAddress "$Email" -Server "EXCHANGESERVER.contoso.net" -Enabled $true -Company "$Company" -ProfilePath "$ProfilePath" -ScriptPath "$LogonScript" -HomeDrive H -HomeDirectory "$DrivePath" -Title "$JobTitle" -GivenName "$FirstName" -Surname "$LastName" -Department "$Department"
 
 <# Sets the IP phone and notes field is the user object#>
 $i = Get-ADUser "$FirstName.$LastName" -Server "EXCHANGESERVER.contoso.net" -Properties info | %{ $_.info}
